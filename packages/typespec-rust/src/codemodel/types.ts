@@ -469,7 +469,7 @@ export type PayloadFormatType = 'BinaryFormat' | 'JsonFormat' | 'NoFormat' | 'Xm
 export type ModelPayloadFormatType = Exclude<PayloadFormatType, 'BinaryFormat' | 'NoFormat'>;
 
 /** ResponseTypes defines the type constraint when creating a Response<T> */
-export type ResponseTypes = MarkerType | Unit | WireType;
+export type ResponseTypes = MarkerType | Option<WireType> | Unit | WireType;
 
 /** Response is a Rust Response<T, Format> from azure_core */
 export interface Response<T extends ResponseTypes = ResponseTypes, Format extends PayloadFormatType = PayloadFormatType> extends External {

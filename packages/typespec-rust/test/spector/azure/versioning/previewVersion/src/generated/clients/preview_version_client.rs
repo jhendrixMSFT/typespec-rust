@@ -83,7 +83,7 @@ impl PreviewVersionClient {
         &self,
         id: &str,
         options: Option<PreviewVersionClientGetWidgetOptions<'_>>,
-    ) -> Result<Response<Widget>> {
+    ) -> Result<Response<Option<Widget>>> {
         if id.is_empty() {
             return Err(azure_core::Error::with_message(
                 azure_core::error::ErrorKind::Other,
@@ -169,7 +169,7 @@ impl PreviewVersionClient {
         id: &str,
         color_update: RequestContent<UpdateWidgetColorRequest>,
         options: Option<PreviewVersionClientUpdateWidgetColorOptions<'_>>,
-    ) -> Result<Response<Widget>> {
+    ) -> Result<Response<Option<Widget>>> {
         if id.is_empty() {
             return Err(azure_core::Error::with_message(
                 azure_core::error::ErrorKind::Other,

@@ -550,7 +550,7 @@ export interface ResponseHeadersTrait {
   name: string;
 
   /** the type for which to implement the trait */
-  implFor: types.AsyncResponse<types.MarkerType> | types.Response<types.MarkerType | types.Model>;
+  implFor: types.AsyncResponse<types.MarkerType> | types.Response<types.MarkerType | types.Model | types.Option<types.Model>>;
 
   /** the headers in the trait */
   headers: Array<ResponseHeader>;
@@ -587,7 +587,7 @@ interface ClientParameterBase {
 }
 
 /** base type for HTTP-based methods */
-interface HTTPMethodBase extends method.Method<types.Type> {
+interface HTTPMethodBase extends method.Method<types.Result> {
   /** the params passed to the method (excluding self). can be empty */
   params: Array<HTTPParameterBase>;
 
@@ -631,7 +631,7 @@ class ClientParameterBase implements ClientParameterBase {
   }
 }
 
-class HTTPMethodBase extends method.Method<types.Type> implements HTTPMethodBase {
+class HTTPMethodBase extends method.Method<types.Result> implements HTTPMethodBase {
   constructor(name: string, languageIndependentName: string, httpMethod: HTTPMethod, httpPath: string, visibility: types.Visibility, impl: string, self: method.Self) {
     super(name, languageIndependentName, visibility, impl, self);
     this.httpMethod = httpMethod;
@@ -912,7 +912,7 @@ export class ResponseHeaderScalar implements ResponseHeaderScalar {
 }
 
 export class ResponseHeadersTrait implements ResponseHeadersTrait {
-  constructor(name: string, implFor: types.AsyncResponse<types.MarkerType> | types.Response<types.MarkerType | types.Model>, docs: string, visibility: types.Visibility, module: ModuleContainer) {
+  constructor(name: string, implFor: types.AsyncResponse<types.MarkerType> | types.Response<types.MarkerType | types.Model | types.Option<types.Model>>, docs: string, visibility: types.Visibility, module: ModuleContainer) {
     this.kind = 'responseHeadersTrait';
     this.name = name;
     this.implFor = implFor;

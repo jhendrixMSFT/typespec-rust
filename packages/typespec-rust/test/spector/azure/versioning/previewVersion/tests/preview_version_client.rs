@@ -11,7 +11,7 @@ use spector_azpreviewversion::{
 async fn get_widget() {
     let client = PreviewVersionClient::with_no_credential("http://localhost:3000", None).unwrap();
     let resp = client.get_widget("widget-123", None).await.unwrap();
-    let resp = resp.into_model().unwrap();
+    let resp = resp.into_model().unwrap().unwrap();
     assert_eq!(resp.color, Some("blue".to_string()));
     assert_eq!(resp.id, Some("widget-123".to_string()));
     assert_eq!(resp.name, Some("Sample Widget".to_string()));
@@ -51,7 +51,7 @@ async fn update_widget_color() {
         .update_widget_color("widget-123", color_update.try_into().unwrap(), None)
         .await
         .unwrap();
-    let resp = resp.into_model().unwrap();
+    let resp = resp.into_model().unwrap().unwrap();
     assert_eq!(resp.color, Some("red".to_string()));
     assert_eq!(resp.id, Some("widget-123".to_string()));
     assert_eq!(resp.name, Some("Sample Widget".to_string()));

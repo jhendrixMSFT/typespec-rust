@@ -35,7 +35,11 @@ export function emitHeaderTraitDocExample(trait: rust.ResponseHeadersTrait, inde
           useFromHttp = `http::{Response, ${trait.implFor.format}}`;
           break;
       }
-      targetType = trait.implFor.content;
+      if (trait.implFor.content.kind === 'option') {
+        targetType = trait.implFor.content.type;
+      } else {
+        targetType = trait.implFor.content;
+      }
       break;
   }
 

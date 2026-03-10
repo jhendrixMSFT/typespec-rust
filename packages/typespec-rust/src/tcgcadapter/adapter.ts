@@ -2187,8 +2187,18 @@ export class Adapter {
 
       rustMethod.returns = new rust.Result(this.crate, poller);
     } else if (method.response.type && responseFormat !== 'BinaryFormat') {
-      const response = new rust.Response(this.crate, this.typeToWireType(this.getType(method.response.type)), responseFormat);
-      rustMethod.returns = new rust.Result(this.crate, response);
+      const bodyType = this.typeToWireType(this.getType(method.response.type));
+      // if some responses have a body and some don't (e.g. 200 with model, 204 with no content),
+      // wrap the body type in Option<T> so the method signature reflects the optional body.
+      let hasOptionalBody = false;
+      for (const response of method.operation.responses) {
+        if (!response.type) {
+          hasOptionalBody = true;
+          break;
+        }
+      }
+      const contentType: rust.ResponseTypes = hasOptionalBody ? this.getOptionType(bodyType) : bodyType;
+      rustMethod.returns = new rust.Result(this.crate, new rust.Response(this.crate, contentType, responseFormat));
     } else if (responseHeaders.length > 0) {
       // for methods that don't return a modeled type but return headers,
       // we need to return a marker type
@@ -2210,10 +2220,7 @@ export class Adapter {
       rustMethod.returns = new rust.Result(this.crate, new rust.Response(this.crate, this.getUnitType(), responseFormat));
     }
 
-    // Mark the set of success status codes expected from this method.
     rustMethod.statusCodes = getStatusCodes(method.operation);
-
-    // For long running operations, we add 200 OK if not already present for the LRO polling and terminal states.
     if (method.kind === 'lro') {
       if (!rustMethod.statusCodes.includes(200)) {
         rustMethod.statusCodes.push(200);
@@ -2315,7 +2322,7 @@ export class Adapter {
     };
 
     // response header traits are only ever for marker types and payloads
-    let implFor: rust.AsyncResponse<rust.MarkerType> | rust.Response<rust.MarkerType | rust.Model>;
+    let implFor: rust.AsyncResponse<rust.MarkerType> | rust.Response<rust.MarkerType | rust.Model | rust.Option<rust.Model>>;
     switch (method.returns.type.kind) {
       case 'pager':
       case 'poller':
@@ -2326,6 +2333,9 @@ export class Adapter {
           case 'marker':
           case 'model':
             implFor = <rust.Response<rust.MarkerType | rust.Model>>method.returns.type;
+            break;
+          case 'option':
+            implFor = <rust.Response<rust.Option<rust.Model>>>method.returns.type;
             break;
           default:
             throw new AdapterError('InternalError', `unexpected trait impl content kind ${method.returns.type.content.kind}`);
@@ -2342,7 +2352,15 @@ export class Adapter {
         break;
     }
 
-    const traitName = `${recursiveTypeName(implFor.kind === 'asyncResponse' ? implFor.type : implFor.content)}Headers`;
+    let traitContentType: rust.MarkerType | rust.WireType;
+    if (implFor.kind === 'asyncResponse') {
+      traitContentType = implFor.type;
+    } else if (implFor.content.kind === 'option') {
+      traitContentType = implFor.content.type;
+    } else {
+      traitContentType = implFor.content;
+    }
+    const traitName = `${recursiveTypeName(traitContentType)}Headers`;
 
     // NOTE: the complete doc text will be emitted at codegen time
     const docs = this.asDocLink(`${client.name}::${method.name}()`, `crate::generated::clients::${client.name}::${method.name}()`);

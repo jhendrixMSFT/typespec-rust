@@ -912,7 +912,7 @@ impl AzureAppConfigurationClient {
     /// use azure_core::{Result, http::Response};
     /// use appconfiguration::models::{KeyValue, KeyValueHeaders};
     /// async fn example() -> Result<()> {
-    ///     let response: Response<KeyValue> = unimplemented!();
+    ///     let response: Response<Option<KeyValue>> = unimplemented!();
     ///     // Access response headers
     ///     if let Some(content_type) = response.content_type()? {
     ///         println!("content-type: {:?}", content_type);
@@ -939,7 +939,7 @@ impl AzureAppConfigurationClient {
         key: &str,
         accept: String,
         options: Option<AzureAppConfigurationClientDeleteKeyValueOptions<'_>>,
-    ) -> Result<Response<KeyValue>> {
+    ) -> Result<Response<Option<KeyValue>>> {
         if key.is_empty() {
             return Err(azure_core::Error::with_message(
                 azure_core::error::ErrorKind::Other,

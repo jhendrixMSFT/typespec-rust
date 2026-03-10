@@ -1606,8 +1606,8 @@ function getLroMethodBody(crate: rust.Crate, indent: helpers.indentation, use: U
     && method.finalResultStrategy.kind === 'header'
     && method.finalResultStrategy.headerName === 'azure-asyncoperation'
     && pollingStepHeaderName === 'azure-asyncoperation'
-    && method.statusCodes.some(sc => sc == 200)
-    && method.statusCodes.some(sc => sc == 201);
+    && method.statusCodes.includes(200)
+    && method.statusCodes.includes(201);
 
   // Match an ARM PATCH operation ("update"), which may have immediate 200 OK response with no headers and no poller status
   const isArmPatchLro = bodyFormat === 'json'
@@ -1616,8 +1616,8 @@ function getLroMethodBody(crate: rust.Crate, indent: helpers.indentation, use: U
     && method.finalResultStrategy.kind === 'header'
     && method.finalResultStrategy.headerName === 'location'
     && pollingStepHeaderName === 'location'
-    && method.statusCodes.some(sc => sc == 200)
-    && method.statusCodes.some(sc => sc == 202);
+    && method.statusCodes.includes(200)
+    && method.statusCodes.includes(202);
 
   // Match an ARM POST operation ("export"), which may have empty initial response
   const isArmPostLro = bodyFormat === 'json'
@@ -1626,8 +1626,8 @@ function getLroMethodBody(crate: rust.Crate, indent: helpers.indentation, use: U
     && method.finalResultStrategy.kind === 'header'
     && method.finalResultStrategy.headerName === 'location'
     && pollingStepHeaderName === 'azure-asyncoperation'
-    && method.statusCodes.some(sc => sc == 200)
-    && method.statusCodes.some(sc => sc == 202);
+    && method.statusCodes.includes(200)
+    && method.statusCodes.includes(202);
 
   // Match an ARM DELETE operation, which may have empty responses and only communicate via status codes
   const isArmDeleteLro = bodyFormat === 'json'
@@ -1636,9 +1636,9 @@ function getLroMethodBody(crate: rust.Crate, indent: helpers.indentation, use: U
     && method.finalResultStrategy.kind === 'header'
     && method.finalResultStrategy.headerName === 'location'
     && pollingStepHeaderName === 'location'
-    && method.statusCodes.some(sc => sc == 200)
-    && method.statusCodes.some(sc => sc == 202)
-    && method.statusCodes.some(sc => sc == 204);
+    && method.statusCodes.includes(200)
+    && method.statusCodes.includes(202)
+    && method.statusCodes.includes(204);
 
   if (isArmPutLro || isArmPatchLro) {
     body += 'let original_url = url.clone();\n';

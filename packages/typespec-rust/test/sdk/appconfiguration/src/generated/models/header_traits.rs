@@ -385,7 +385,7 @@ pub trait KeyValueHeaders: private::Sealed {
     fn request_id(&self) -> Result<Option<String>>;
 }
 
-impl KeyValueHeaders for Response<KeyValue> {
+impl KeyValueHeaders for Response<Option<KeyValue>> {
     /// Content-Type header
     fn content_type(&self) -> Result<Option<GetKeyValueResponseContentType>> {
         Headers::get_optional_as(self.headers(), &CONTENT_TYPE)
@@ -567,9 +567,9 @@ mod private {
     impl Sealed for Response<AzureAppConfigurationClientCheckSnapshotsResult, NoFormat> {}
     impl Sealed for Response<AzureAppConfigurationClientCreateSnapshotOperationStatus> {}
     impl Sealed for Response<KeyListResult> {}
-    impl Sealed for Response<KeyValue> {}
     impl Sealed for Response<KeyValueListResult> {}
     impl Sealed for Response<LabelListResult> {}
+    impl Sealed for Response<Option<KeyValue>> {}
     impl Sealed for Response<Snapshot> {}
     impl Sealed for Response<SnapshotListResult> {}
 }
