@@ -13,13 +13,11 @@ use crate::{
         FileWithHttpPartOptionalContentTypeRequest, FileWithHttpPartRequiredContentTypeRequest,
         FileWithHttpPartSpecificContentTypeRequest,
     },
+    multipart::{MultipartFormData, Part},
 };
 use azure_core::{
     error::CheckSuccessOptions,
-    http::{
-        Method, NoFormat, Pipeline, PipelineSendOptions, Request, RequestContent, Response, Url,
-        UrlExt,
-    },
+    http::{Method, NoFormat, Pipeline, PipelineSendOptions, Request, Response, Url, UrlExt},
     tracing, Result,
 };
 
@@ -39,11 +37,12 @@ impl MultiPartFormDataHttpPartsContentTypeClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Request containing a file with specific content type (`image/jpg`).
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.HttpParts.ContentType.imageJpegContentType")]
     pub async fn image_jpeg_content_type(
         &self,
-        body: RequestContent<FileWithHttpPartSpecificContentTypeRequest, NoFormat>,
+        body: FileWithHttpPartSpecificContentTypeRequest,
         options: Option<MultiPartFormDataHttpPartsContentTypeClientImageJpegContentTypeOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -53,8 +52,11 @@ impl MultiPartFormDataHttpPartsContentTypeClient {
             "/multipart/form-data/check-filename-and-specific-content-type-with-httppart",
         );
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let form = MultipartFormData::new().part("profileImage", Part::from(body.profile_image));
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -75,11 +77,12 @@ impl MultiPartFormDataHttpPartsContentTypeClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Request containing a file with optional content type.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.HttpParts.ContentType.optionalContentType")]
     pub async fn optional_content_type(
         &self,
-        body: RequestContent<FileWithHttpPartOptionalContentTypeRequest, NoFormat>,
+        body: FileWithHttpPartOptionalContentTypeRequest,
         options: Option<MultiPartFormDataHttpPartsContentTypeClientOptionalContentTypeOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -87,8 +90,11 @@ impl MultiPartFormDataHttpPartsContentTypeClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/file-with-http-part-optional-content-type");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let form = MultipartFormData::new().part("profileImage", Part::from(body.profile_image));
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -109,11 +115,12 @@ impl MultiPartFormDataHttpPartsContentTypeClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Request containing a file with required content type.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.HttpParts.ContentType.requiredContentType")]
     pub async fn required_content_type(
         &self,
-        body: RequestContent<FileWithHttpPartRequiredContentTypeRequest, NoFormat>,
+        body: FileWithHttpPartRequiredContentTypeRequest,
         options: Option<MultiPartFormDataHttpPartsContentTypeClientRequiredContentTypeOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -123,8 +130,11 @@ impl MultiPartFormDataHttpPartsContentTypeClient {
             "/multipart/form-data/check-filename-and-required-content-type-with-httppart",
         );
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let form = MultipartFormData::new().part("profileImage", Part::from(body.profile_image));
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(

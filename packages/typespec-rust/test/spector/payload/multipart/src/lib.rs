@@ -8,3 +8,4 @@
 mod generated;
 pub use generated::*;
 pub mod form_data;
+pub mod multipart;

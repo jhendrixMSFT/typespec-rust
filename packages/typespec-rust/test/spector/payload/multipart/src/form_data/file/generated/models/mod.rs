@@ -6,6 +6,5 @@
 mod method_options;
 #[allow(clippy::module_inception)]
 mod models;
-mod models_serde;
 pub use method_options::*;
 pub use models::*;

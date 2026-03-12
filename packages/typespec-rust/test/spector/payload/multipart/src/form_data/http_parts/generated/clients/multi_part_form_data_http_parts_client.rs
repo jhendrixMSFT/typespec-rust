@@ -10,13 +10,11 @@ use crate::{
         non_string::clients::MultiPartFormDataHttpPartsNonStringClient,
     },
     models::ComplexHttpPartsModelRequest,
+    multipart::{MultipartFormData, Part},
 };
 use azure_core::{
     error::CheckSuccessOptions,
-    http::{
-        Method, NoFormat, Pipeline, PipelineSendOptions, Request, RequestContent, Response, Url,
-        UrlExt,
-    },
+    http::{Method, NoFormat, Pipeline, PipelineSendOptions, Request, Response, Url, UrlExt},
     tracing, Result,
 };
 
@@ -58,11 +56,12 @@ impl MultiPartFormDataHttpPartsClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Request containing JSON arrays and file arrays with HTTP parts.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.HttpParts.jsonArrayAndFileArray")]
     pub async fn json_array_and_file_array(
         &self,
-        body: RequestContent<ComplexHttpPartsModelRequest, NoFormat>,
+        body: ComplexHttpPartsModelRequest,
         options: Option<MultiPartFormDataHttpPartsClientJsonArrayAndFileArrayOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -70,8 +69,18 @@ impl MultiPartFormDataHttpPartsClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/complex-parts-with-httppart");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let mut form = MultipartFormData::new()
+            .text("id", &body.id)
+            .json("address", &body.address)?
+            .part("profileImage", Part::from(body.profile_image))
+            .json("previousAddresses", &body.previous_addresses)?;
+        for picture in body.pictures {
+            form = form.part("pictures", Part::from(picture));
+        }
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(

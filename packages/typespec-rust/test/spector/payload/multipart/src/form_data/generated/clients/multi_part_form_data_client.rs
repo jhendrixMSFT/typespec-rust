@@ -21,13 +21,11 @@ use crate::{
         BinaryArrayPartsRequest, ComplexPartsRequest, JsonPartRequest, MultiBinaryPartsRequest,
         MultiPartOptionalRequest, MultiPartRequest, MultiPartRequestWithWireName,
     },
+    multipart::MultipartFormData,
 };
 use azure_core::{
     error::CheckSuccessOptions,
-    http::{
-        Method, NoFormat, Pipeline, PipelineSendOptions, Request, RequestContent, Response, Url,
-        UrlExt,
-    },
+    http::{Method, NoFormat, Pipeline, PipelineSendOptions, Request, Response, Url, UrlExt},
     tracing, Result,
 };
 
@@ -47,11 +45,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Anonymous model with a single profile image part.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.anonymousModel")]
     pub async fn anonymous_model(
         &self,
-        body: RequestContent<AnonymousModelRequest, NoFormat>,
+        body: AnonymousModelRequest,
         options: Option<MultiPartFormDataClientAnonymousModelOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -59,8 +58,11 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/anonymous-model");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let form = MultipartFormData::new().part("profileImage", body.profile_image);
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -81,11 +83,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Multipart request with `id` and `profileImage`.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.basic")]
     pub async fn basic(
         &self,
-        body: RequestContent<MultiPartRequest, NoFormat>,
+        body: MultiPartRequest,
         options: Option<MultiPartFormDataClientBasicOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -93,8 +96,13 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/mixed-parts");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let form = MultipartFormData::new()
+            .text("id", body.id)
+            .part("profileImage", body.profile_image);
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -115,11 +123,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Multipart request with `id` and an array of `pictures`.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.binaryArrayParts")]
     pub async fn binary_array_parts(
         &self,
-        body: RequestContent<BinaryArrayPartsRequest, NoFormat>,
+        body: BinaryArrayPartsRequest,
         options: Option<MultiPartFormDataClientBinaryArrayPartsOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -127,8 +136,14 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/binary-array-parts");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let mut form = MultipartFormData::new().text("id", body.id);
+        for picture in body.pictures {
+            form = form.part("pictures", picture);
+        }
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -149,11 +164,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Multipart request with `id` and `profileImage` (validates filename and content type).
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.checkFileNameAndContentType")]
     pub async fn check_file_name_and_content_type(
         &self,
-        body: RequestContent<MultiPartRequest, NoFormat>,
+        body: MultiPartRequest,
         options: Option<MultiPartFormDataClientCheckFileNameAndContentTypeOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -161,8 +177,13 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/check-filename-and-content-type");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let form = MultipartFormData::new()
+            .text("id", body.id)
+            .part("profileImage", body.profile_image);
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -183,11 +204,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Complex multipart request with string, JSON, binary, and binary array parts.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.fileArrayAndBasic")]
     pub async fn file_array_and_basic(
         &self,
-        body: RequestContent<ComplexPartsRequest, NoFormat>,
+        body: ComplexPartsRequest,
         options: Option<MultiPartFormDataClientFileArrayAndBasicOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -195,8 +217,17 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/complex-parts");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let mut form = MultipartFormData::new()
+            .text("id", body.id)
+            .json("address", &body.address)?
+            .part("profileImage", body.profile_image);
+        for picture in body.pictures {
+            form = form.part("pictures", picture);
+        }
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -235,11 +266,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Multipart request with a JSON `address` and binary `profileImage`.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.jsonPart")]
     pub async fn json_part(
         &self,
-        body: RequestContent<JsonPartRequest, NoFormat>,
+        body: JsonPartRequest,
         options: Option<MultiPartFormDataClientJsonPartOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -247,8 +279,13 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/json-part");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let form = MultipartFormData::new()
+            .json("address", &body.address)?
+            .part("profileImage", body.profile_image);
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -269,11 +306,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Multipart request with a required `profileImage` and optional `picture`.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.multiBinaryParts")]
     pub async fn multi_binary_parts(
         &self,
-        body: RequestContent<MultiBinaryPartsRequest, NoFormat>,
+        body: MultiBinaryPartsRequest,
         options: Option<MultiPartFormDataClientMultiBinaryPartsOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -281,8 +319,14 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/multi-binary-parts");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let mut form = MultipartFormData::new().part("profileImage", body.profile_image);
+        if let Some(picture) = body.picture {
+            form = form.part("picture", picture);
+        }
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -303,11 +347,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Multipart request where both `id` and `profileImage` are optional.
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.optionalParts")]
     pub async fn optional_parts(
         &self,
-        body: RequestContent<MultiPartOptionalRequest, NoFormat>,
+        body: MultiPartOptionalRequest,
         options: Option<MultiPartFormDataClientOptionalPartsOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -315,8 +360,17 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/optional-parts");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let mut form = MultipartFormData::new();
+        if let Some(id) = body.id {
+            form = form.text("id", id);
+        }
+        if let Some(profile_image) = body.profile_image {
+            form = form.part("profileImage", profile_image);
+        }
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
@@ -337,11 +391,12 @@ impl MultiPartFormDataClient {
     ///
     /// # Arguments
     ///
+    /// * `body` - Multipart request with wire name remapping (`identifier`→`id`, `image`→`profileImage`).
     /// * `options` - Optional parameters for the request.
     #[tracing::function("Payload.MultiPart.FormData.withWireName")]
     pub async fn with_wire_name(
         &self,
-        body: RequestContent<MultiPartRequestWithWireName, NoFormat>,
+        body: MultiPartRequestWithWireName,
         options: Option<MultiPartFormDataClientWithWireNameOptions<'_>>,
     ) -> Result<Response<(), NoFormat>> {
         let options = options.unwrap_or_default();
@@ -349,8 +404,13 @@ impl MultiPartFormDataClient {
         let mut url = self.endpoint.clone();
         url.append_path("/multipart/form-data/mixed-parts-with-wire-name");
         let mut request = Request::new(url, Method::Post);
-        request.insert_header("content-type", "multipart/form-data");
-        request.set_body(body);
+
+        let form = MultipartFormData::new()
+            .text("id", body.identifier)
+            .part("profileImage", body.image);
+        request.insert_header("content-type", form.content_type_header());
+        request.set_body(form.into_bytes());
+
         let rsp = self
             .pipeline
             .send(
