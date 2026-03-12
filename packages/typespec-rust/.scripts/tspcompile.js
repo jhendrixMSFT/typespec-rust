@@ -36,7 +36,7 @@ const httpSpecsGroup = {
   'spector_jmergepatch': {input: 'payload/json-merge-patch'},
   'spector_corepageable': {input: 'payload/pageable'},
   'spector_mediatype': {input: 'payload/media-type'},
-  //'spector_multipart': {input: 'payload/multipart'},
+  'spector_multipart': {input: 'payload/multipart'},
   'spector_xml': {input: 'payload/xml'},
   'spector_routes': {input: 'routes'},
   'spector_jsonencodedname': {input: 'serialization/encoded-name/json'},

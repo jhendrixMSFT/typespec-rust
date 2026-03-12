@@ -74,6 +74,7 @@ members = [
     "spector/payload/content-negotiation",
     "spector/payload/json-merge-patch",
     "spector/payload/media-type",
+    "spector/payload/multipart",
     "spector/payload/pageable",
     "spector/payload/xml",
     "spector/resiliency/srv-driven/new",

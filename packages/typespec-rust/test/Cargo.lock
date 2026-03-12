@@ -2312,6 +2312,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "spector_multipart"
+version = "0.1.0"
+dependencies = [
+ "azure_core",
+ "serde",
+]
+
+[[package]]
 name = "spector_multiple"
 version = "0.1.0"
 dependencies = [
