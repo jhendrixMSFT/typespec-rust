@@ -484,7 +484,8 @@ export class Adapter {
     // include error and LRO polling types as output types
     if (
       <tcgc.UsageFlags>(model.usage & tcgc.UsageFlags.Output) === tcgc.UsageFlags.Output ||
-      <tcgc.UsageFlags>(model.usage & tcgc.UsageFlags.LroPolling) === tcgc.UsageFlags.LroPolling
+      <tcgc.UsageFlags>(model.usage & tcgc.UsageFlags.LroPolling) === tcgc.UsageFlags.LroPolling ||
+      <tcgc.UsageFlags>(model.usage & tcgc.UsageFlags.Exception) === tcgc.UsageFlags.Exception
     ) {
       modelFlags |= rust.ModelFlags.Output;
     }
