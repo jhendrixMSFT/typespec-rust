@@ -56,15 +56,6 @@ describe('typespec-rust: codegen', () => {
   });
 
   describe('helpers', () => {
-    it('annotationDerive', () => {
-      strictEqual(helpers.annotationDerive(true), '#[derive(Clone, Deserialize, SafeDebug, Serialize)]\n');
-      strictEqual(helpers.annotationDerive(true, 'Copy'), '#[derive(Clone, Copy, Deserialize, SafeDebug, Serialize)]\n');
-      strictEqual(helpers.annotationDerive(true, '', 'Copy'), '#[derive(Clone, Copy, Deserialize, SafeDebug, Serialize)]\n');
-      strictEqual(helpers.annotationDerive(false), '#[derive(Clone, SafeDebug)]\n');
-      strictEqual(helpers.annotationDerive(false, 'Copy'), '#[derive(Clone, Copy, SafeDebug)]\n');
-      strictEqual(helpers.annotationDerive(false, '', 'Copy'), '#[derive(Clone, Copy, SafeDebug)]\n');
-    });
-
     it('emitVisibility', () => {
       strictEqual(helpers.emitVisibility('pub'), 'pub ');
       strictEqual(helpers.emitVisibility('pubCrate'), 'pub(crate) ');

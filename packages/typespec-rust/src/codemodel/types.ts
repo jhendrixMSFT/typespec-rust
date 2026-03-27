@@ -356,11 +356,14 @@ export enum ModelFlags {
   /** model is an error */
   Error = 8,
 
+  /** model is a pub(crate) helper for spread parameters */
+  SpreadHelper = 256,
+
   /**
    * model is a pub(crate) helper for polymorphic base types.
    * this flag is mutually exclusive with all other flags.
    */
-  PolymorphicBase = 16,
+  PolymorphicBase = 512,
 }
 
 /** DateTimeEncoding is the wire format of the date/time */

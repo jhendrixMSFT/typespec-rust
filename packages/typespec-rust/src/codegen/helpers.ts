@@ -340,25 +340,6 @@ export class indentation {
 }
 
 /**
- * emits the derive annotation with the standard and any additional values
- * 
- * @param serde indicates if serde annotations should be included
- * @param extra contains any extra derive values
- * @returns a derive macro
- */
-export function annotationDerive(serde: boolean, ...extra: Array<string>): string {
-  const derive = new Array<string>('Clone', 'SafeDebug');
-  if (serde) {
-    derive.push('Deserialize', 'Serialize');
-  }
-  // remove any empty values
-  extra = extra.filter(entry => entry.trim() !== '');
-  derive.push(...extra);
-  derive.sort();
-  return `#[derive(${derive.join(', ')})]\n`;
-}
-
-/**
  * used to sort strings in ascending order
  * 
  * @param a is the value on the left side

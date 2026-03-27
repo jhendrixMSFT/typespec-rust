@@ -477,6 +477,8 @@ export class Adapter {
     let modelFlags = rust.ModelFlags.Unspecified;
     if (<tcgc.UsageFlags>(model.usage & tcgc.UsageFlags.Input) === tcgc.UsageFlags.Input) {
       modelFlags |= rust.ModelFlags.Input;
+    } else if (<tcgc.UsageFlags>(model.usage & tcgc.UsageFlags.Spread) === tcgc.UsageFlags.Spread) {
+      modelFlags = rust.ModelFlags.Input | rust.ModelFlags.SpreadHelper;
     }
 
     // include error and LRO polling types as output types
@@ -616,7 +618,7 @@ export class Adapter {
           if (!module.models.includes(baseModel)) {
             // we only fix up the base model if it's not
             // in the collection of models for this module
-            baseModel.flags = rust.ModelFlags.PolymorphicBase;
+            baseModel.flags = rust.ModelFlags.Input | rust.ModelFlags.PolymorphicBase;
             // internal serde helper only
             baseModel.visibility = 'pubCrate';
             const lifetime = new rust.Lifetime('a');

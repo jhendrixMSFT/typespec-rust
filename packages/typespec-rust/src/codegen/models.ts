@@ -6,6 +6,7 @@
 //cspell: ignore addl
 
 import { Context } from './context.js';
+import { Derive } from './derive.js';
 import { CodegenError } from './errors.js';
 import * as helpers from './helpers.js';
 import { Use } from './use.js';
@@ -79,65 +80,37 @@ function emitModelDefinitions(module: rust.ModuleContainer, context: Context): h
       continue;
     }
 
-    const hasAzureErrorDetailFields = function(type: rust.Type): boolean {
-      switch (type.kind) {
-        case 'model':
-          for (const field of type.fields) {
-            if (hasAzureErrorDetailFields(field.type)) {
-              return true;
-            }
-          }
-          break;
-        case 'option':
-          if (hasAzureErrorDetailFields(type.type)) {
-            return true;
-          }
-          break;
-        case 'external':
-          if (type.name === 'ErrorDetail' && type.path === 'azure_core::error') {
-            return true;
-          }
-          break;
-      }
+    body += helpers.formatDocComment(model.docs);
 
-      return false;
-    }
-    const isOperationStatus = hasAzureErrorDetailFields(model);
+    const bodyFormat = context.getModelBodyFormat(model);
+    const hasXmlAddlProps = bodyFormat === 'xml' ? model.fields.some((each) => each.kind === 'additionalProperties') : false;
 
     // we add these here to avoid using serde for marker-only models.
     // NOTE: PolymorphicBase are pub(crate) serialization helpers used
     // for polymorphic base types.  they are Serialize only and the
     // flag is mutually exclusive with all other flags.
+    const derive = new Derive();
 
-    if (model.flags !== rust.ModelFlags.PolymorphicBase) {
-      use.add('serde', 'Deserialize');
+    if ((model.flags & rust.ModelFlags.PolymorphicBase) === 0) {
+      derive.add('Clone', 'SafeDebug');
+
+      // skip deriving Default for spread param models.
+      // it's not necessary and will cause compilation failures
+      // when the type contains something that doesn't have a
+      // default impl (e.g. enum types).
+      if ((model.flags & rust.ModelFlags.SpreadHelper) === 0) {
+        derive.add('Default');
+      }
     }
-
-    if (!isOperationStatus) {
-      use.add('serde', 'Serialize');
-    }
-
-    const bodyFormat = context.getModelBodyFormat(model);
 
     // if the model is XML and contains additional properties,
     // it will need a full custom serde implementation. so, we
     // need to omit any serde derive annotations.
-    const hasXmlAddlProps = bodyFormat === 'xml' ? model.fields.some((each) => each.kind === 'additionalProperties') : false;
-
-    body += helpers.formatDocComment(model.docs);
-
-    // skip deriving Default for spread param models.
-    // it's not necessary and will cause compilation failures
-    // when the type contains something that doesn't have a
-    // default impl (e.g. enum types).
-    if (isOperationStatus) {
-      body += `#[derive(Default, Deserialize, SafeDebug)]\n`;
-    } else if (model.flags !== rust.ModelFlags.PolymorphicBase) {
-      body += helpers.annotationDerive(!hasXmlAddlProps, model.flags !== rust.ModelFlags.Unspecified ? 'Default' : '');
-    } else {
-      // rust.ModelFlags.PolymorphicBase only needs this
-      body += '#[derive(Serialize)]\n';
+    if (!hasXmlAddlProps) {
+      derive.addSerdeForFlags(model.flags, use);
     }
+
+    body += derive.text();
 
     if (<rust.ModelFlags>(model.flags & rust.ModelFlags.Output) === rust.ModelFlags.Output && (model.flags & rust.ModelFlags.Input) === 0) {
       // output-only models get the non_exhaustive annotation
