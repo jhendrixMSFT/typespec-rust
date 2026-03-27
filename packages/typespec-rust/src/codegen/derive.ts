@@ -36,12 +36,19 @@ export class Derive {
    * @param use the use statement builder currently in scope
    */
   addSerdeForFlags(flags: rust.ModelFlags, use: Use): void {
+    if (flags & rust.ModelFlags.Input) {
+      this.add('Serialize');
+      use.add('serde', 'Serialize');
+    }
+    if (flags & rust.ModelFlags.Output) {
+      this.add('Deserialize');
+      use.add('serde', 'Deserialize');
+    }
     // for model types we want to add both
     // for polymorphic base types and spread helper we want Serialize only
-    const needsSerialize = ((flags & rust.ModelFlags.Input) !== 0 || (flags & rust.ModelFlags.Output) !== 0);
+    /*const needsSerialize = ((flags & rust.ModelFlags.Input) !== 0 || (flags & rust.ModelFlags.Output) !== 0);
     const needsDeserialize = needsSerialize && (flags & (rust.ModelFlags.PolymorphicBase | rust.ModelFlags.SpreadHelper)) === 0;
-    //const needsDeserialize = (flags & rust.ModelFlags.SpreadHelper) === 0 && ((flags & rust.ModelFlags.Input) !== 0 || (flags & rust.ModelFlags.Output) !== 0);
-    //const needsSerialize = needsDeserialize || (flags & rust.ModelFlags.Input) !== 0 || flags === rust.ModelFlags.PolymorphicBase;
+
     if (needsDeserialize) {
       this.add('Deserialize');
       use.add('serde', 'Deserialize');
@@ -49,7 +56,7 @@ export class Derive {
     if (needsSerialize) {
       this.add('Serialize');
       use.add('serde', 'Serialize');
-    }
+    }*/
   }
 
   /**
