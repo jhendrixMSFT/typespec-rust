@@ -171,6 +171,12 @@ generate('alternate_types', alternate_types, 'test/other/alternate_types');
 const appconfiguration = pkgRoot + 'test/tsp/AppConfiguration/client.tsp';
 generate('appconfiguration', appconfiguration, 'test/sdk/appconfiguration');
 
+const easm = pkgRoot + 'test/tsp/Easm';
+generate('easm', easm, 'test/sdk/easm');
+
+const quantum_workspace = pkgRoot + 'test/tsp/Quantum.Workspace';
+generate('quantum_workspace', quantum_workspace, 'test/sdk/quantum_workspace');
+
 const keyvault_secrets = pkgRoot + 'test/tsp/Security.KeyVault.Secrets/client.tsp';
 generate('keyvault_secrets', keyvault_secrets, 'test/sdk/keyvault_secrets', ['omit-constructors=true']);
 

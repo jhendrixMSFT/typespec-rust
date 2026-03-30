@@ -102,18 +102,15 @@ function emitModelDefinitions(module: rust.ModuleContainer, context: Context): h
 
       return false;
     }
-    const isOperationStatus = hasAzureErrorDetailFields(model);
+
+    const hasErrorDetail = hasAzureErrorDetailFields(model);
 
     // we add these here to avoid using serde for marker-only models.
     // NOTE: PolymorphicBase are pub(crate) serialization helpers used
     // for polymorphic base types.  they are Serialize only and the
     // flag is mutually exclusive with all other flags.
 
-    if (model.flags !== rust.ModelFlags.PolymorphicBase) {
-      use.add('serde', 'Deserialize');
-    }
-
-    if (!isOperationStatus) {
+    if (model.flags !== rust.ModelFlags.PolymorphicBase && !hasErrorDetail) {
       use.add('serde', 'Serialize');
     }
 
@@ -130,10 +127,15 @@ function emitModelDefinitions(module: rust.ModuleContainer, context: Context): h
     // it's not necessary and will cause compilation failures
     // when the type contains something that doesn't have a
     // default impl (e.g. enum types).
-    if (isOperationStatus) {
-      body += `#[derive(Default, Deserialize, SafeDebug)]\n`;
+    if (hasErrorDetail) {
+      body += `#[derive(Clone, Default, Deserialize, SafeDebug)]\n`;
     } else if (model.flags !== rust.ModelFlags.PolymorphicBase) {
-      body += helpers.annotationDerive(!hasXmlAddlProps, model.flags !== rust.ModelFlags.Unspecified ? 'Default' : '');
+      use.add('serde', 'Deserialize');
+      let serde: helpers.IncludeSerde = hasXmlAddlProps ? 'false' : 'true';
+      if (hasErrorDetail) {
+        serde = 'deserialize';
+      }
+      body += helpers.annotationDerive(serde, model.flags !== rust.ModelFlags.Unspecified ? 'Default' : '');
     } else {
       // rust.ModelFlags.PolymorphicBase only needs this
       body += '#[derive(Serialize)]\n';

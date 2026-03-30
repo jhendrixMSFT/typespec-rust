@@ -52,6 +52,7 @@
     "@azure-tools/azure-http-specs": "0.1.0-alpha.38",
     "@azure-tools/typespec-azure-core": "~0.66.0",
     "@azure-tools/typespec-azure-resource-manager": "~0.66.0",
+    "@azure-tools/typespec-azure-rulesets": "~0.66.0",
     "@azure-tools/typespec-client-generator-core": "~0.66.3",
     "@eslint/js": "^9.39.1",
     "@types/node": "^20.19.25",
