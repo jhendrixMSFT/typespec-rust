@@ -552,7 +552,15 @@ export class Adapter {
 
     if (addlProps) {
       const addlPropsType = this.getHashMap(this.typeToWireType(this.getType(addlProps)));
-      const addlPropsField = new rust.ModelAdditionalProperties('additional_properties', 'pub', this.getOptionType(addlPropsType));
+      let fieldName = 'additional_properties';
+      const renameAdditionalProperties = model.decorators.find(
+        d => d.name === 'Azure.ClientGenerator.Core.@clientOption'
+          && d.arguments['name'] === 'renameAdditionalProperties'
+      )?.arguments['value'] as string | undefined;
+      if (renameAdditionalProperties) {
+        fieldName = renameAdditionalProperties;
+      }
+      const addlPropsField = new rust.ModelAdditionalProperties(fieldName, 'pub', this.getOptionType(addlPropsType));
       addlPropsField.docs.summary = 'Contains unnamed additional properties.';
       rustModel.fields.push(addlPropsField);
     }

@@ -22,11 +22,19 @@ model DeserializeWith {
     times: offsetDateTime[];
 }
 
+model RenamedAdditionalProps is Record<string> {
+    name: string;
+}
+
 @@access(DeserializeWith, Access.public);
 @@usage(DeserializeWith, Usage.output);
+
+@@access(RenamedAdditionalProps, Access.public);
+@@usage(RenamedAdditionalProps, Usage.output);
 
 @@clientOption(DeserializeWith.name, "deserialize_with", "crate::models::deserialize_name", "rust");
 @@clientOption(DeserializeWith.safeInt, "deserialize_with", "crate::models::deserialize_safeint", "rust");
 @@clientOption(DeserializeWith.base64, "deserialize_with", "crate::models::deserialize_base64", "rust");
 @@clientOption(DeserializeWith.time, "deserialize_with", "crate::models::deserialize_time", "rust");
 @@clientOption(DeserializeWith.times, "deserialize_with", "crate::models::deserialize_times", "rust");
+@@clientOption(RenamedAdditionalProps, "renameAdditionalProperties", "values", "rust");

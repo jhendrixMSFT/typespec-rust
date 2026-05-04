@@ -7,6 +7,7 @@ use super::models_serde;
 use azure_core::{base64, fmt::SafeDebug, time::OffsetDateTime};
 use serde::{Deserialize, Serialize};
 use serde_json::Number;
+use std::collections::HashMap;
 
 #[derive(Clone, Default, Deserialize, SafeDebug, Serialize)]
 #[non_exhaustive]
@@ -48,4 +49,15 @@ pub struct DeserializeWith {
         skip_serializing_if = "Option::is_none"
     )]
     pub times: Option<Vec<OffsetDateTime>>,
+}
+
+#[derive(Clone, Default, Deserialize, SafeDebug, Serialize)]
+#[non_exhaustive]
+pub struct RenamedAdditionalProps {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+
+    /// Contains unnamed additional properties.
+    #[serde(flatten)]
+    pub values: Option<HashMap<String, String>>,
 }

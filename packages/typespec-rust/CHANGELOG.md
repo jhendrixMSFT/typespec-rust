@@ -9,6 +9,7 @@
 ### Features Added
 
 * Update ARM codegen to use cloud config.
+* Added support for `renameAdditionalProperties` `@clientOption` decorator to specify a custom name for the `additional_properties` field.
 
 ### Bugs Fixed
 
